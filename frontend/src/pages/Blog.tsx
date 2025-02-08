@@ -3,10 +3,10 @@
  
 
 import { useParams } from "react-router-dom"
-import { Appbar } from "../components/Appbar"
+// import { Appbar } from "../components/Appbar"
 import { FullBlog } from "../components/FullBlog"
 import { useBlog } from "../hooks"
-import { Skleton } from "../components/Skleton"
+// import { Skleton } from "../components/Skleton"
 export const Blog = () => {
       const {id} = useParams()
       console.log(id)

@@ -3,9 +3,9 @@
 
 
 import {BACKEND_URL} from "../../config"
-import { ChangeEvent, ChangeEventHandler, useState } from "react"
+import { ChangeEvent, useState } from "react"
 import { Link } from "react-router-dom"
-import { SignInInput, SignUpInput } from "@murali222/common"
+import {  SignUpInput } from "@murali222/common"
 import axios from "axios"
  
 import { useNavigate } from "react-router-dom"
