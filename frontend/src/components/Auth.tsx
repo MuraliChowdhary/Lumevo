@@ -9,6 +9,7 @@ import {  SignUpInput } from "@murali222/common"
 import axios from "axios"
  
 import { useNavigate } from "react-router-dom"
+import { LoadingBUtton } from "./LodingBUtton"
 export const Auth = ({ type }: { type: "signup" | "signin" }) => {
 
     const [postInputs, setPostInputs] = useState<SignUpInput>({
@@ -16,11 +17,18 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
         email: "",
         password: ""
     })
+    const [loading,setLoading]=useState(false)
+
     const navigate = useNavigate();
         console.log(postInputs)
+
+        
     async function sendRequest(){
-        const request = await axios.post(`${BACKEND_URL}/api/v1/user/${type==="signup"?"signup":"signin"}`,postInputs);
+          //if(loading) return
+          //setLoading(true)
          
+        const request = await axios.post(`${BACKEND_URL}/api/v1/user/${type==="signup"?"signup":"signin"}`,postInputs);
+        
        try{
         if(request.status == 200){
             const jwt = request.data.jwt;
@@ -28,6 +36,7 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
             console.log(user)
             localStorage.setItem("token",jwt)
             localStorage.setItem("User",JSON.stringify(user))
+          setLoading(false)
             navigate("/blogs")
         }
         else{
@@ -79,10 +88,19 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
                         })
                     }} />
 
-                    <button onClick={sendRequest}type="button" className=" w-full mt-2 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none 
+                    <button onClick={sendRequest}
+                    type="button"  
+                    className=" w-full mt-2 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none 
                     focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm 
                          py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 
-                    dark:focus:ring-gray-700 dark:border-gray-700">{type === "signup"?"Sign up":"Sign in"}</button>
+                    dark:focus:ring-gray-700 dark:border-gray-700"
+                    disabled={loading}  
+                    >
+
+                        {loading ? <LoadingBUtton /> : (type === "signup" ? "Sign up" : "Sign in")}
+
+                    
+                    </button>
                 </div>
             </div>
 
