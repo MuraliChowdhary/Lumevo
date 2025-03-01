@@ -1,6 +1,6 @@
 # Blog Platform
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+ 
 ![Tech Stack](https://img.shields.io/badge/stack-React.js%20%7C%20Hono%20%7C%20Cloudflare%20Workers%20%7C%20PostgreSQL%20%7C%20JWT-brightgreen)
 
 🔗 **[Live Demo](https://lumevo.vercel.app/signup)**
