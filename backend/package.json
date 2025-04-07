@@ -5,20 +5,20 @@
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
-    "@prisma/client": "^5.8.1",
-    "@prisma/extension-accelerate": "^0.6.0",
+    "@prisma/client": "^6.5.0",
+    "@prisma/extension-accelerate": "^0.6.3",
     "bcryptjs": "^2.4.3",
     "buffer-polyfill": "^6.0.3",
     "events-polyfill": "^2.1.2",
     "hono": "^4.0.5",
     "path-browserify": "^1.0.1",
-    "prisma": "^5.8.1",
     "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241218.0",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "prisma": "^6.5.0",
     "wrangler": "^3.22.1"
   },
   "browser": {
@@ -27,6 +27,3 @@
     "os": false
   }
 }
-
-
-

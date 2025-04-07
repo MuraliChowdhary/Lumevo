@@ -123,6 +123,7 @@ userRouters.post("/signin",async(c)=>{
     })
   }
     catch(err){
+      console.log(err)
       c.status(500);
       return c.json({
         error:"Internal Server error"

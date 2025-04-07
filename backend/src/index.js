@@ -8,7 +8,15 @@ app.route("/api/v1/user", userRouters);
 app.route("/api/v1/blog", blogRouter);
 app.get("/", (c) => {
     return c.json({
-        msg: "Hello Medium"
+        msg: "Hello Lumevo"
+    });
+});
+app.get("/user", (c) => {
+    return c.json({
+        msg: {
+            user: "Murali",
+            email: "murali@gmail.com"
+        }
     });
 });
 export default app;
