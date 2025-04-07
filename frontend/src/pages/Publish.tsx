@@ -39,7 +39,7 @@ export const Publish = () => {
             <Appbar />
             <div className="flex justify-center w-3/4">
                 <div className="max-w-screen-lg w-3/4">
-                    <label className="block mb-2 text-sm font-medium text-gray-900 mt-10">
+                    <label className="block mb-2 text-sm font-Lumevo text-gray-900 mt-10">
                         Your message
                     </label>
                     <textarea
@@ -53,7 +53,7 @@ export const Publish = () => {
                         <button
                             type="submit"
                             onClick={handlePublish}
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-Lumevo rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                             disabled={loading}  
                         >
                             {loading ? <LoadingBUtton /> : "Publish post"}

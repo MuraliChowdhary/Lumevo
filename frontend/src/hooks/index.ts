@@ -8,8 +8,10 @@ export interface Blog{
     "id":number,
     "publication":boolean,
      "author":{
-          "name":string
-     }
+          "name":string,
+          "bio":string
+     },
+    
 
     
 }

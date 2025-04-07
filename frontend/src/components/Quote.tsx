@@ -14,7 +14,7 @@ export const Quote = ()=>
                     <div className="max-w-md text-left text-xl font-semibold mt-4">
                     Julis winfeild
                 </div>
-                <div className="max-w-md text-left text-md font-light font-medium opacity-40">
+                <div className="max-w-md text-left text-md font-light font-Lumevo opacity-40">
                     CEO  | ACNE CORP
                 </div>
                     </div>
