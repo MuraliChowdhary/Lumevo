@@ -4,22 +4,28 @@ import { Link } from "react-router-dom";
 import { SignUpInput } from "@murali222/common";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import  {LoadingButton}  from "./LoadingButton";
+import { LoadingButton } from "./LoadingButton";
 
-export const Auth = ({ type }: { type: "signup" | "signin" }) => {
+interface AuthProps {
+  type: "signup" | "signin";
+  setIsAuthenticated?: (value: boolean) => void;
+}
+
+export const Auth = ({ type, setIsAuthenticated }: AuthProps) => {
   const [postInputs, setPostInputs] = useState<SignUpInput>({
     name: "",
     email: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
-  console.log(postInputs);
 
   async function sendRequest() {
-    if (loading) return;  
+    if (loading) return;
     setLoading(true);
+    setError(null);
 
     try {
       const request = await axios.post(
@@ -30,15 +36,19 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
       if (request.status === 200) {
         const jwt = request.data.jwt;
         const user = request.data.user;
-        console.log(user);
         localStorage.setItem("token", jwt);
         localStorage.setItem("User", JSON.stringify(user));
+        
+        // Update auth state both through prop and storage event
+        setIsAuthenticated?.(true);
+        window.dispatchEvent(new Event("storage"));
+        
         navigate("/blogs");
       } else {
-        console.log("Request:", request.data);
-        alert(request.data.message);
+        setError(request.data.message || "An error occurred");
       }
-    } catch (err) {
+    } catch (err: any) {
+      setError(err.response?.data?.message || "An error occurred during sign in");
       console.error("Error:", err);
     } finally {
       setLoading(false);
@@ -66,6 +76,12 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
             </div>
           </div>
 
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
+              {error}
+            </div>
+          )}
+
           <div>
             {type === "signup" ? (
               <LabelInput
@@ -78,14 +94,14 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
             ) : null}
             <LabelInput
               label="Username"
-              placeholder="Enter your Username"
+              placeholder="Enter your email"
               onChange={(e) =>
                 setPostInputs({ ...postInputs, email: e.target.value })
               }
             />
             <LabelInput
               label="Password"
-              placeholder="Enter your Password"
+              placeholder="Enter your password"
               type="password"
               onChange={(e) =>
                 setPostInputs({ ...postInputs, password: e.target.value })
@@ -96,8 +112,8 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
               onClick={sendRequest}
               type="button"
               className="w-full mt-2 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none 
-                    focus:ring-4 focus:ring-gray-300 font-Lumevo rounded-lg text-sm 
-                         py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 
+                    focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm 
+                    py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 
                     dark:focus:ring-gray-700 dark:border-gray-700"
               disabled={loading}
             >
@@ -127,9 +143,9 @@ function LabelInput({ label, placeholder, onChange, type }: LabelInputType) {
         <input
           onChange={onChange}
           type={type || "text"}
-          className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 
-                    focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 
-                    dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 
+                    focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 
+                    dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder={placeholder}
           required
         />
