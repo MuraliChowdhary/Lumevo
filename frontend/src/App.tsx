@@ -3,7 +3,6 @@ import './App.css'
 import {BrowserRouter,Route,Routes,Navigate} from "react-router-dom"
 import { Signup } from './pages/Signup'
 import { Blog } from './pages/Blog'
-import { Signin } from './pages/SIgnin'
 import {Blogs} from "./pages/Blogs"
 import {Publish} from "./pages/Publish"
 import  Home from "./components/Home"
