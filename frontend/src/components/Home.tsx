@@ -186,31 +186,50 @@ declare global {
     trackConversion?: (event: string, data: Record<string, any>) => void;
   }
 }
-
 function Home() {
   useEffect(() => {
     // Re-initialize tracking after component mount
     setTimeout(() => {
       if (window.trackConversion) {
-        // Re-attach event listeners to buttons
-        document.querySelectorAll('[class*="purchase"], [class*="buy"], [id*="purchase"], [id*="buy"], [class*="checkout"], [class*="subscribe"], [id*="subscribe"]').forEach(btn => {
+        // Re-attach event listeners to all conversion buttons
+        document.querySelectorAll(
+          '[class*="purchase"], [class*="buy"], [id*="purchase"], [id*="buy"], [class*="checkout"], ' + 
+          '[class*="subscribe"], [id*="subscribe"], ' + 
+          '[class*="signup"], [id*="signup"], ' + 
+          '[class*="signin"], [id*="signin"], [class*="login"], [id*="login"], ' +
+          '[class*="register"], [id*="register"]'
+        ).forEach(btn => {
           btn.addEventListener('click', function() {
-            const eventType = btn.className.includes('subscribe') || btn.id.includes('subscribe') 
-              ? 'subscription_intent' 
-              : 'purchase_intent';
-              if (window.trackConversion) {
-                window.trackConversion(eventType, {});
-              }
+            let eventType = 'default';
+            
+            // Determine the event type based on the button's class or ID
+            if (btn.className.includes('subscribe') || btn.id.includes('subscribe')) {
+              eventType = 'subscription_intent';
+            } else if (btn.className.includes('signup') || btn.id.includes('signup') || 
+                      btn.className.includes('register') || btn.id.includes('register')) {
+              eventType = 'signup';
+            } else if (btn.className.includes('signin') || btn.id.includes('signin') || 
+                      btn.className.includes('login') || btn.id.includes('login')) {
+              eventType = 'signin';
+            } else if (btn.className.includes('purchase') || btn.id.includes('purchase') || 
+                      btn.className.includes('buy') || btn.id.includes('buy') || 
+                      btn.className.includes('checkout')) {
+              eventType = 'purchase_intent';
+            }
+            
+            if (window.trackConversion) {
+              window.trackConversion(eventType, { source: 'button_click' });
+            }
           });
         });
       }
-    }, 1000); // Small delay to ensure DOM is fully rendered
+    }, 1000);
   }, []);
 
   return (
     <div>
       <h1>Welcome to our site</h1>
-      <div>
+      <div className="flex flex-col gap-4">
         <button id="buy-now" className="buy-button p-2 bg-blue-600 rounded-xl text-white">
           Buy Now
         </button>
@@ -220,19 +239,35 @@ function Home() {
         <button id="subscribe-button" className="subscribe-button p-2 bg-green-600 rounded-xl text-white">
           Subscribe
         </button>
-        <a className="checkout-link">Checkout</a>
-        
-        {/* Test button with direct tracking call */}
-        <button 
-          className="p-2 bg-red-600 rounded-xl text-white mt-4"
-          onClick={() => {
-            if (window.trackConversion) {
-              window.trackConversion('subscription_intent', {});
-            }
-          }}
-        >
-          Test Subscription
+        <button id="signup-button" className="signup-button p-2 bg-purple-600 rounded-xl text-white">
+          Sign Up
         </button>
+        <button id="signin-button" className="signin-button p-2 bg-yellow-600 rounded-xl text-white">
+          Sign In
+        </button>
+        <a className="checkout-link p-2 bg-blue-600 rounded-xl text-white inline-block">Checkout</a>
+        
+        {/* Test buttons with direct tracking calls */}
+        <div className="flex gap-2 mt-4">
+          <button 
+            className="p-2 bg-red-600 rounded-xl text-white"
+            onClick={() => window.trackConversion && window.trackConversion('subscription_intent', { source: 'button_click' })}
+          >
+            Test Subscription
+          </button>
+          <button 
+            className="p-2 bg-red-600 rounded-xl text-white"
+            onClick={() => window.trackConversion && window.trackConversion('signup',{source : 'signup_click'})}
+          >
+            Test Signup
+          </button>
+          <button 
+            className="p-2 bg-red-600 rounded-xl text-white"
+            onClick={() => window.trackConversion && window.trackConversion('signin',{source:'signin_click'})}
+          >
+            Test Signin
+          </button>
+        </div>
       </div>
     </div>
   );
