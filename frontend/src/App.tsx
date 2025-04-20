@@ -6,6 +6,7 @@ import { Blogs } from './pages/Blogs';
 import { Signin } from './pages/SIgnin';
 import { Blog } from './pages/Blog';
 import { Publish } from './pages/Publish';
+import TrackingInitializer from './components/TrackingInitializer';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
 
@@ -22,6 +23,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+      <TrackingInitializer />
         <Routes>
           <Route path='/' element={<Home/>}/>
           <Route path="/signup" element={<Signup/>}/>
