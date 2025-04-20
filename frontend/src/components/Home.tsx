@@ -45,7 +45,7 @@ function Home() {
 
   return (
     <div className="relative bg-gradient-to-b from-[#cbccff] via-[#9296f0] to-[#5b63b7] text-[#000000]" id="home">
-      {/* Floating Navigation */}
+       
       <div className="flex justify-center items-center">
         <FloatingNav 
           className="w-auto h-12 fixed bottom-5 z-50 bg-[#9296f0]/80 backdrop-blur-sm border border-[#5b63b7] rounded-full shadow-lg"
@@ -53,7 +53,7 @@ function Home() {
         />
       </div>
 
-      {/* Hero Section */}
+      
       <div className="h-screen relative w-full bg-gradient-to-br from-[#cbccff] to-[#9296f0] flex flex-col items-center justify-center overflow-hidden">
         <div className="w-full absolute inset-0 h-screen">
           <SparklesCore
@@ -109,7 +109,7 @@ function Home() {
         </motion.div>
       </div>
 
-      {/* About Section */}
+     
       <div className="py-20 px-6 md:px-12 lg:px-24 bg-gradient-to-b from-[#cbccff] to-[#9296f0]" id="about">
         <motion.div
           initial={{ opacity: 0 }}
@@ -121,7 +121,7 @@ function Home() {
         </motion.div>
       </div>
 
-      {/* Categories Section */}
+      
       <div className="bg-gradient-to-b from-[#9296f0] to-[#5b63b7] py-16 px-6 md:px-12 lg:px-24" id="categories">
         <motion.div
           initial={{ scale: 0.95 }}
@@ -133,7 +133,7 @@ function Home() {
         </motion.div>
       </div>
 
-      {/* FAQ Section */}
+       
       <div className="py-12 px-6 md:px-12 lg:px-24 bg-[#5b63b7] text-[#cbccff]" id="faqs">
         <h1 className="text-center text-4xl font-bold mb-12">FAQs</h1>
         <div className="max-w-4xl mx-auto">
@@ -156,13 +156,23 @@ function Home() {
         </div>
       </div>
 
-      {/* Footer */}
+       
       <div className="bg-gradient-to-t from-[#5b63b7] to-[#9296f0] text-[#cbccff] py-12" id="footer">
         <div className="max-w-6xl mx-auto">
           <Footer />
         </div>
       </div>
+
+
+
+      <div>
+      <button id="buy-now" className="p-2 bg-blue-600 rounded-xl text-white">Buy Now</button>
+<button id="purchase-button" className="p-2 bg-blue-600 rounded-xl text-white">Purchase</button>
+<a className="checkout-link">Checkout</a>
+      </div>
     </div>
+
+      
   );
 }
 
