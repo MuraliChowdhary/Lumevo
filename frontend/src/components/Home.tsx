@@ -186,15 +186,21 @@ declare global {
     trackConversion?: (event: string, data: Record<string, any>) => void;
   }
 }
+
 function Home() {
   useEffect(() => {
     // Re-initialize tracking after component mount
     setTimeout(() => {
       if (window.trackConversion) {
         // Re-attach event listeners to buttons
-        document.querySelectorAll('[class*="purchase"], [class*="buy"], [id*="purchase"], [id*="buy"], [class*="checkout"]').forEach(btn => {
+        document.querySelectorAll('[class*="purchase"], [class*="buy"], [id*="purchase"], [id*="buy"], [class*="checkout"], [class*="subscribe"], [id*="subscribe"]').forEach(btn => {
           btn.addEventListener('click', function() {
-            window.trackConversion?.('purchase_intent', {});
+            const eventType = btn.className.includes('subscribe') || btn.id.includes('subscribe') 
+              ? 'subscription_intent' 
+              : 'purchase_intent';
+              if (window.trackConversion) {
+                window.trackConversion(eventType, {});
+              }
           });
         });
       }
@@ -211,6 +217,9 @@ function Home() {
         <button id="purchase-button" className="purchase-button p-2 bg-blue-600 rounded-xl text-white">
           Purchase
         </button>
+        <button id="subscribe-button" className="subscribe-button p-2 bg-green-600 rounded-xl text-white">
+          Subscribe
+        </button>
         <a className="checkout-link">Checkout</a>
         
         {/* Test button with direct tracking call */}
@@ -218,11 +227,11 @@ function Home() {
           className="p-2 bg-red-600 rounded-xl text-white mt-4"
           onClick={() => {
             if (window.trackConversion) {
-              window.trackConversion('manual_test', {});
+              window.trackConversion('subscription_intent', {});
             }
           }}
         >
-          Test Conversion
+          Test Subscription
         </button>
       </div>
     </div>
