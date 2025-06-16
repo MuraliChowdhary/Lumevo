@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Used by Prisma Accelerate, if applicable
+}
+
+// Defines the roles a User can have
+enum UserRole {
+  ADMIN
+  USER
+}
+
+// Represents an authenticated user in your system
+model User {
+  id                 String       @id @default(uuid())
+  email              String       @unique
+  name               String?
+  password           String // Hashed password
+  role               UserRole     @default(USER) // User's role (ADMIN or USER)
+  avatar             String?      // URL to user's profile picture
+  bio                String?      // User's short biography
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  // Aggregate counts for user's contributions and impact
+  postsCount         Int          @default(0) // Total posts created by this user
+  receivedLikesCount Int          @default(0) // Total likes received across all posts authored by this user
+
+  // Relations to other models
+  posts              Post[]
+  comments           Comment[]
+  likes              Like[]
+  newsletters        Newsletter[] // Optional: Linking Newsletter subscriptions to existing users
+}
+
+// Represents a blog post
+model Post {
+  id            String    @id @default(uuid())
+  title         String    // Title of the blog post
+  content       String    // Full content of the blog post
+  excerpt       String?   // Short summary of the post
+  published     Boolean   @default(false) // Whether the post is publicly visible
+  featured      Boolean   @default(false) // Whether the post is featured on the homepage
+  imageUrl      String?   // URL for the post's featured image
+  slug          String?   @unique // URL-friendly unique identifier for the post (e.g., "my-first-blog-post")
+  tags          String[]  // Array of tags associated with the post
+  readTime      Int?      // Estimated reading time in minutes
+  viewCount     Int       @default(0) // Number of times the post has been viewed
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  publishedAt   DateTime? // Date when the post was published
+
+  // Aggregate counts for post interactions
+  commentsCount Int       @default(0) // Total number of comments on this post
+  likesCount    Int       @default(0) // Total number of likes on this post
+
+  // Relation to the author
+  author        User      @relation(fields: [authorId], references: [id])
+  authorId      String    // ID of the user who authored this post
+
+  // Relations to related models
+  comments      Comment[]
+  likes         Like[]
+
+  // Indexes for improved query performance
+  @@index([published, createdAt]) // Efficiently query published posts by creation date
+  @@index([slug])                  // Fast lookup by slug for individual post pages
+  @@index([authorId])              // Efficiently retrieve all posts by a specific author
+}
+
+// Represents a comment on a blog post
+model Comment {
+  id        String    @id @default(uuid())
+  content   String    // The comment's text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Author details (can be a registered user or a guest)
+  author    User?     @relation(fields: [authorId], references: [id]) // Optional relation to User
+  authorId  String?   // Nullable: If the comment is from a guest
+
+  isGuest   Boolean   @default(false) // True if the comment was made by an unauthenticated user
+  guestName String?   // Optional: Name provided by the guest
+  guestEmail String?  // Optional: Email provided by the guest
+
+  // Relation to the post it belongs to
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade) // If post is deleted, delete its comments
+  postId    String
+
+  // Self-referencing relation for threaded comments (replies)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  String?   // Nullable: If this is a top-level comment, otherwise ID of the parent comment
+  replies   Comment[] @relation("CommentReplies") // Comments that are replies to this comment
+
+  // Indexes for improved query performance
+  @@index([postId, createdAt]) // Efficiently retrieve all comments for a post, ordered by date
+}
+
+// Represents a like on a blog post
+model Like {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+
+  // User details (can be a registered user or a guest)
+  user      User?     @relation(fields: [userId], references: [id]) // Optional relation to User
+  userId    String?   // Nullable: If the like is from a guest
+
+  isGuest   Boolean   @default(false) // True if the like was made by an unauthenticated user
+  // guestIdentifier String? // Optional: For advanced guest like deduplication (e.g., based on cookie ID)
+                              // If not used, truly anonymous guests could technically like multiple times
+                              // if no frontend mechanism prevents it.
+
+  // Relation to the post it belongs to
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade) // If post is deleted, delete its likes
+  postId    String
+
+  // Ensures a registered user can only like a post once.
+  // This constraint does not apply if userId is NULL (i.e., for guest likes).
+  @@unique([userId, postId])
+
+  // Index for improved query performance
+  @@index([postId]) // Efficiently retrieve all likes for a specific post
+}
+
+// Represents a newsletter subscriber
+model Newsletter {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  subscribed Boolean   @default(true) // Whether the email is currently subscribed
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Optional: Link to an existing User if the subscriber is also a registered user
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?   @unique // Ensures one user account links to only one newsletter subscription entry here
+}
