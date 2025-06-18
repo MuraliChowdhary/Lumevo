@@ -18,7 +18,25 @@ type Variables = {
 const app = new Hono<{ Bindings: Binding; Variables: Variables }>();
 
 
-app.use("*",cors())
+app.use('/api/*', cors({
+  origin: [
+    'https://blog-pnp.vercel.app',
+    'https://blog.pickandpartner.com',
+    'http://localhost:3000'
+  ],
+  allowHeaders: [
+    'Content-Type',           // This is essential for JSON requests
+    'Authorization',          // For JWT tokens
+    'X-Custom-Header', 
+    'Upgrade-Insecure-Requests'
+  ],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
+  exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+  maxAge: 600,
+  credentials: true,
+}))
+
+
 
 // OPTIONS handler (🔥 Required for preflight requests)
 // app.options('*', (c) => {
