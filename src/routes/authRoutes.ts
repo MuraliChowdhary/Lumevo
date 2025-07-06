@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client/edge';
 import { withAccelerate } from '@prisma/extension-accelerate';
 import { sign, verify } from 'hono/jwt';
 import bcrypt from 'bcryptjs';
+
 import {getCookie, setCookie, deleteCookie } from 'hono/cookie';
 // No longer importing PrismaClientKnownRequestError
 
@@ -10,6 +11,9 @@ type Binding = {
   DATABASE_URL: string;
   JWT_SECRET: string;
   NODE_ENV: 'development' | 'production';
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
 };
 
 type Variables = {
@@ -328,6 +332,7 @@ userRouters.post('/signin', async (c) => {
     await prisma.$disconnect();
   }
 });
+
 
 // --- User Profile Management Routes ---
 
@@ -651,6 +656,138 @@ userRouters.put('/admin/users/:id/role', async (c) => {
   }
 });
 
+userRouters.delete('/admin/users/:id', async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const header = c.req.header("Authorization") || "";
+
+    if (!header) {
+      return c.json({ error: "Authorization header required" }, 401);
+    }
+
+    const token = header.startsWith('Bearer ') ? header.slice(7) : header;
+
+    let decoded;
+    try {
+      decoded = await verify(token, c.env.JWT_SECRET);
+    } catch (jwtError: unknown) {
+      console.error('JWT verification error:', jwtError);
+      return c.json({ error: "Invalid or expired token" }, 401);
+    }
+
+    // ✅ Only allow a specific root admin
+    const ROOT_ADMIN_ID = "985f34f9-1c15-4bbb-9f7a-e370dddec502";
+    if (
+      !decoded ||
+      typeof decoded.id !== 'string' ||
+      decoded.role !== 'ADMIN' ||
+      decoded.id !== ROOT_ADMIN_ID // ✅ Check if it's the root admin
+    ) {
+      return c.json({ error: "Root admin access required" }, 403);
+    }
+
+    const userId = c.req.param('id');
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!existingUser) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+    return c.json({
+      message: 'User deleted successfully',
+      userId,
+    });
+  } catch (error: unknown) {
+    console.error('Delete user error:', error);
+
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      return c.json({ error: 'Invalid JSON body provided' }, 400);
+    }
+
+    if (error instanceof Error) {
+      return c.json({ error: 'Internal server error: ' + error.message }, 500);
+    }
+    return c.json({ error: 'Internal server error' }, 500);
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
+// Cloudinary signature generation endpoint
+async function generateCloudinarySignature(
+  paramsToSign: Record<string, string | number>,
+  apiSecret: string
+): Promise<string> {
+  // Sort parameters by key
+  const sortedParams = Object.keys(paramsToSign)
+    .sort()
+    .map(key => `${key}=${paramsToSign[key]}`)
+    .join('&');
+  
+  // Create the string to sign
+  const stringToSign = `${sortedParams}${apiSecret}`;
+  
+  // Generate SHA1 hash using Web Crypto API
+  const encoder = new TextEncoder();
+  const data = encoder.encode(stringToSign);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  
+  // Convert to hex string
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return hashHex;
+}
+
+// Cloudinary signature generation endpoint
+userRouters.post('/imageupload', async (c) => {
+  try {
+    // Get environment variables
+    const cloudName = c.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const apiKey = c.env.CLOUDINARY_API_KEY;
+    const apiSecret = c.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      return c.json({ error: 'Cloudinary configuration missing' }, 500);
+    }
+
+    const body = await c.req.json();
+    const { folder } = body;
+
+    const timestamp = Math.round((new Date()).getTime() / 1000);
+
+    // Parameters to sign (only include folder and timestamp)
+    const paramsToSign: Record<string, string | number> = {
+      timestamp: timestamp,
+      folder: folder || 'my_uploads',
+    };
+
+    // Generate signature using our custom function
+    const signature = await generateCloudinarySignature(paramsToSign, apiSecret);
+
+    return c.json({ 
+      timestamp, 
+      signature, 
+      cloudname: cloudName,
+      api_key: apiKey // Include API key for frontend use
+    });
+  } catch (error) {
+    console.error('Error generating Cloudinary signature:', error);
+    return c.json({ error: 'Failed to generate upload signature' }, 500);
+  }
+});
+
+
+
+
 // --- Newsletter Routes ---
 
 // Newsletter subscription
@@ -758,3 +895,4 @@ userRouters.post('/newsletter/unsubscribe', async (c) => {
     await prisma.$disconnect();
   }
 });
+

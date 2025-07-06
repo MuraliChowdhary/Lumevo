@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { blogRouter } from './routes/blog';
 import { userRouters } from './routes/authRoutes';
-import { getCorsHeaders, handleOptions } from './utils/getHeaders'; // 🔥 Import utils
+import { getCorsHeaders, handleOptions } from './utils/getHeaders'; 
 
 type Binding = {
   DATABASE_URL: string;
@@ -22,7 +22,8 @@ app.use('/api/*', cors({
   origin: [
     'https://blog-pnp.vercel.app',
     'https://blog.pickandpartner.com',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'https://blog-newsletter-lemon.vercel.app'
   ],
   allowHeaders: [
     'Content-Type',           // This is essential for JSON requests
